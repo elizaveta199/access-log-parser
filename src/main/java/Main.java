@@ -4,6 +4,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         int count = 0;
+        Statistics statistics = new Statistics();
         while (true) {
             String path = new Scanner(System.in).nextLine();
             File file = new File(path);
@@ -31,28 +32,21 @@ public class Main {
                         if (length > 1024) {
                             throw new LineTooLongException("В файле есть строка длиннее 1024 символов. ");
                         }
-                        String[] parts = line.split("\"");
-                        if (parts.length > 5) {
-                            String userAgent = parts[5];
-                            int startLine = userAgent.indexOf('(');
-                            int endLine = userAgent.indexOf(')');
-                            if (startLine != -1 && endLine != -1 && startLine < endLine) {
-                                String firstBrackets = userAgent.substring(startLine + 1, endLine);
-                                String[] userAgentParts = firstBrackets.split(";");
-                                if (userAgentParts.length >= 2) {
-                                    for (int i = 0; i < userAgentParts.length; i++) {
-                                        userAgentParts[i] = userAgentParts[i].trim();
-                                    }
-                                    String fragment = userAgentParts[1];
-                                    String bot = fragment.split("/")[0];
-                                    if (bot.equalsIgnoreCase("Googlebot")) {
-                                        googlebotCount++;
-                                    } else if (bot.equalsIgnoreCase("YandexBot")) {
-                                        yandexBotCount++;
-                                    }
-                                }
-                            }
+
+                        LogEntry logEntry = new LogEntry(line);
+                        if (logEntry.getIpAddr() == null) {
+                            continue;
                         }
+                        statistics.addEntry(logEntry);
+                        String[] partsUA = line.split("\"");
+                        if (logEntry.getAgent().isGooglebot(partsUA[5])) {
+                            googlebotCount++;
+                        } else if (logEntry.getAgent().isYandexBot(partsUA[5])) {
+                            yandexBotCount++;
+                        } else {
+                            continue;
+                        }
+
                         totalLines++;
                     }
                     System.out.println("Общее количество строк в файле: " + totalLines);
@@ -62,6 +56,9 @@ public class Main {
                     double yandexDivTotal = (double) yandexBotCount / totalLines;
                     System.out.println("Доля запросов от Googlebot: " + googleDivTotal);
                     System.out.println("Доля запросов от YandexBot: " + yandexDivTotal);
+                    System.out.println("Объем данных общий : " + statistics.getTotalTraffic());
+                    System.out.println("Средний объем трафика за час: " + statistics.getTrafficRate());
+
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
