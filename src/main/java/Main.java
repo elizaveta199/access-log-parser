@@ -60,6 +60,8 @@ public class Main {
                     System.out.println("Средний объем трафика за час: " + statistics.getTrafficRate());
                     //System.out.println("Список всех страниц: " + statistics.getAllPages());
                     System.out.println("Статистика операционных систем: " + statistics.getOsStatistics());
+                    System.out.println("Список всех ненайденных страниц: " + statistics.getAllNotFoundPages());
+                    System.out.println("Статистика браузеров: " + statistics.getBrowserStatistic());
 
 
                 } catch (Exception ex) {

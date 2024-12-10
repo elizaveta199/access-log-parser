@@ -11,8 +11,10 @@ public class Statistics {
 
     private final HashSet<String> pages = new HashSet<>();
     private final HashMap<String, Integer> osStatistic = new HashMap<>();
+    private final HashSet<String> notFoundPages = new HashSet<>();
+    private final HashMap<String, Integer> browserStatistic = new HashMap<>();
 
-    int totalTraffic;
+    long totalTraffic;
     LocalDateTime minTime;
     LocalDateTime maxTime;
 
@@ -29,6 +31,13 @@ public class Statistics {
 
         String os = logEntry.getAgent().getOs();
         osStatistic.put(os, osStatistic.getOrDefault(os, 0) + 1);
+
+        if (logEntry.getResponseCode() == 404) {
+            notFoundPages.add(logEntry.getPath());
+        }
+
+        String browser = logEntry.getAgent().getBrowser();
+        browserStatistic.put(browser, browserStatistic.getOrDefault(browser, 0) + 1);
 
         totalTraffic += logEntry.getResponseSize();
 
@@ -57,6 +66,10 @@ public class Statistics {
         return pages;
     }
 
+    public HashSet<String> getAllNotFoundPages() {
+        return notFoundPages;
+    }
+
     public HashMap<String, Double> getOsStatistics() {
         int totalOsCount = osStatistic.values().stream().mapToInt(Integer::intValue).sum();
         HashMap<String, Double> osStatsPercentage = new HashMap<>();
@@ -66,5 +79,16 @@ public class Statistics {
             osStatsPercentage.put(entry.getKey(), percentage);
         }
         return osStatsPercentage;
+    }
+
+    public HashMap<String, Double> getBrowserStatistic() {
+        int totalBrowserCount = browserStatistic.values().stream().mapToInt(Integer::intValue).sum();
+        HashMap<String, Double> browserStatisticPercentage = new HashMap<>();
+
+        for (Map.Entry<String, Integer> entry : browserStatistic.entrySet()) {
+            double percentage = (double) entry.getValue() / totalBrowserCount;
+            browserStatisticPercentage.put(entry.getKey(), percentage);
+        }
+        return browserStatisticPercentage;
     }
 }
