@@ -56,8 +56,10 @@ public class Main {
                     double yandexDivTotal = (double) yandexBotCount / totalLines;
                     System.out.println("Доля запросов от Googlebot: " + googleDivTotal);
                     System.out.println("Доля запросов от YandexBot: " + yandexDivTotal);
-                    System.out.println("Объем данных общий : " + statistics.getTotalTraffic());
+                    System.out.println("Объем данных общий: " + statistics.getTotalTraffic());
                     System.out.println("Средний объем трафика за час: " + statistics.getTrafficRate());
+                    //System.out.println("Список всех страниц: " + statistics.getAllPages());
+                    System.out.println("Статистика операционных систем: " + statistics.getOsStatistics());
 
 
                 } catch (Exception ex) {

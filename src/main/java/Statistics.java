@@ -2,9 +2,15 @@ import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 @Getter
 public class Statistics {
+
+    private final HashSet<String> pages = new HashSet<>();
+    private final HashMap<String, Integer> osStatistic = new HashMap<>();
 
     int totalTraffic;
     LocalDateTime minTime;
@@ -17,6 +23,12 @@ public class Statistics {
     }
 
     public void addEntry(LogEntry logEntry) {
+        if (logEntry.getResponseCode() == 200) {
+            pages.add(logEntry.getPath());
+        }
+
+        String os = logEntry.getAgent().getOs();
+        osStatistic.put(os, osStatistic.getOrDefault(os, 0) + 1);
 
         totalTraffic += logEntry.getResponseSize();
 
@@ -39,5 +51,20 @@ public class Statistics {
             hours = Duration.between(minTime, maxTime).toHours();
         }
         return (double) totalTraffic / (hours == 0 ? 1 : hours);
+    }
+
+    public HashSet<String> getAllPages() {
+        return pages;
+    }
+
+    public HashMap<String, Double> getOsStatistics() {
+        int totalOsCount = osStatistic.values().stream().mapToInt(Integer::intValue).sum();
+        HashMap<String, Double> osStatsPercentage = new HashMap<>();
+
+        for (Map.Entry<String, Integer> entry : osStatistic.entrySet()) {
+            double percentage = (double) entry.getValue() / totalOsCount;
+            osStatsPercentage.put(entry.getKey(), percentage);
+        }
+        return osStatsPercentage;
     }
 }
